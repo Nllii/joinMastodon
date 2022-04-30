@@ -29,7 +29,7 @@ def token(client_id,client_secret,domain):
 
 
 
-def servers():
+def create_accounts():
     response = requests.get('https://api.joinmastodon.org/servers')
     for infomation in response.json():
         domain = infomation['domain']
@@ -56,9 +56,17 @@ def servers():
         access_key =token(client_id,client_secret,domain)
         addy,SSN,phone,phoneprefix,birthday,age,tropicalzodiac,email,username,password,website,useragent,cardtype,card,exp,CVC,company,job,height,weight,bloodtype,UPSTrackingnum,MoneyGram,WesternUnion,favcolor,car,GUID  = fakeuser.FakeNameGenerator().GenerateIdenity()
         create_account(access_key,password,email,domain,username)
+        with open('accounts.csv', 'a') as f:
+            f.write(domain+','+email+','+username+','+password+'\n')
+        print(domain,email,username,password)
+        continue
+        
 
 
     
+
+
+
 
 
 
@@ -80,6 +88,11 @@ def create_account(access_token,password,email,domain,username):
     }
 
     response = requests.post('https://'+domain+'/api/v1/accounts', headers=headers, json=json_data)
-
+    print(response.json())
 
         
+
+
+
+
+create_accounts()
