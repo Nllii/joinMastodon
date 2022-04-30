@@ -1,4 +1,5 @@
 import requests
+# https://github.com/MrKinauJr/FakeNameGenerator
 
 class FakeNameGenerator():
     def __init__(self):
@@ -86,4 +87,4 @@ class FakeNameGenerator():
         print(self.car)
         print(self.GUID)
 
-# FakeNameGenerator().Test()
+# FakeNameGenerator().make_user()

@@ -53,33 +53,7 @@ def servers():
         apps = requests.post('https://'+domain+'/api/v1/apps', headers=headers, json=json_data).json()
         client_secret = apps['client_secret']
         client_id  = apps['client_id']
-        access_key =token(client_id,client_secret,domain)
-        addy,SSN,phone,phoneprefix,birthday,age,tropicalzodiac,email,username,password,website,useragent,cardtype,card,exp,CVC,company,job,height,weight,bloodtype,UPSTrackingnum,MoneyGram,WesternUnion,favcolor,car,GUID  = fakeuser.FakeNameGenerator().GenerateIdenity()
-        create_account(access_key,password,email,domain,username)
+        token(client_id,client_secret,domain)
 
 
     
-
-
-
-def create_account(access_token,password,email,domain,username):
-    headers = {
-        
-        # 'Content-Length': '134',
-        'Content-Type': 'application/json; charset=utf-8',
-        'Authorization': 'Bearer {0}'.format(access_token),
-    }
-
-    json_data = {
-        'email': email,
-        'username': username,
-        'password': password,
-        'reason': '',
-        'agreement': True,
-        'locale': 'en',
-    }
-
-    response = requests.post('https://'+domain+'/api/v1/accounts', headers=headers, json=json_data)
-
-
-        
