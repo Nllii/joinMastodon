@@ -6,7 +6,7 @@ import json
 from json import JSONDecodeError
 # get JSONDecodeError when using this function
 
-
+domains_list = []
 # https://github.com/mastodon/mastodon
 temp_email_domain = "@gmail.com"
 
@@ -32,74 +32,75 @@ def token(client_id,client_secret,domain):
     # print(response.json())
 
 
+not_allowed_domain= "mstdn.jp","troet.cafe"
+
 
 def create_accounts():
-    response = requests.get('https://api.joinmastodon.org/servers')
-    for infomation in response.json():
-        domain = infomation['domain']
-        description = infomation['description']
-        init_instance = requests.get('https://'+domain+'/api/v1/instance')
-        # print(init_instance.json())
-        # print(domain,description)
-        # return domain,description
-        headers = {
-            'Content-Type': 'application/json; charset=utf-8',
-            # 'Content-Length': '171',
-        }
+        response = requests.get('https://api.joinmastodon.org/servers')
 
-        json_data = {
-            'redirect_uris': 'mastodon://joinmastodon.org/oauth',
-            'website': 'https://app.joinmastodon.org/ios',
-            'client_name': 'Mastodon for iOS',
-            'scopes': 'read write follow push',
-        }
+        for infomation in response.json():
+            domain = infomation['domain']
+            print(domain)
+            description = infomation['description']
+            # init_instance = requests.get('https://'+domain+'/api/v1/instance')
+            try:
+                init_instance = requests.get('https://'+domain+'/api/v1/instance')
+                print(init_instance.json())
+                message_ ={
+                    'message': 'This domain is not allowed to create account.',
+                    'info': init_instance.json()
 
-        apps = requests.post('https://'+domain+'/api/v1/apps', headers=headers, json=json_data).json()
-        client_secret = apps['client_secret']
-        client_id  = apps['client_id']
-        access_key =token(client_id,client_secret,domain)
-        addy,SSN,phone,phoneprefix,birthday,age,tropicalzodiac,email,username,password,website,useragent,cardtype,card,exp,CVC,company,job,height,weight,bloodtype,UPSTrackingnum,MoneyGram,WesternUnion,favcolor,car,GUID  = fakeuser.FakeNameGenerator().GenerateIdenity()
-        try:
-                
-            errors = create_account(access_key,password,domain,username)
-            if errors['error'] == 'error' or errors['access_token'] == 'access_token':
+                }
+                print(message_)
+                print(domain)
+                print("\n")
+                headers = {
+                    'Content-Type': 'application/json; charset=utf-8',
+                    # 'Content-Length': '171',
+                }
+
+                json_data = {
+                    'redirect_uris': 'mastodon://joinmastodon.org/oauth',
+                    'website': 'https://app.joinmastodon.org/ios',
+                    'client_name': 'Mastodon for iOS',
+                    'scopes': 'read write follow push',
+                }
+                if domain not in not_allowed_domain:
+                    apps = requests.post('https://'+domain+'/api/v1/apps', headers=headers, json=json_data)
+                    print(apps.json())
+                    print("\n")
+                    print("\n")
+                else:
+                    print(message_)
+            except JSONDecodeError or Exception as e:
+                print("\n")
                 continue
+
+            client_secret =  apps.json()['client_secret']
+            client_id  = apps.json()['client_id']
+            access_key = token(client_id,client_secret,domain)
+            addy,SSN,phone,phoneprefix,birthday,age,tropicalzodiac,email,username,password,website,useragent,cardtype,card,exp,CVC,company,job,height,weight,bloodtype,UPSTrackingnum,MoneyGram,WesternUnion,favcolor,car,GUID  = fakeuser.FakeNameGenerator().GenerateIdenity()
+            account_headers = {
+                
+                # 'Content-Length': '134',
+                'Content-Type': 'application/json; charset=utf-8',
+                'Authorization': 'Bearer {0}'.format(access_key),
+            }
+
+            account_data = {
+                'email': username+temp_email_domain,
+                'username': username,
+                'password': password,
+                'reason': '',
+                'agreement': True,
+                'locale': 'en',
+            }
+
+            response = requests.post('https://'+domain+'/api/v1/accounts', headers=account_headers, json=account_data)
+            # save the response in a csv file
             with open('accounts.csv', 'a') as f:
-                f.write(domain+','+username+temp_email_domain+','+username+','+password+'\n')
-            print(domain,email,username,password)
-            continue
-        except JSONDecodeError and KeyError:
-            print("JSONDecodeError")
-            continue
+                f.write('email:'+username+temp_email_domain,'\tpassword:'+password,'\tdomain:'+domain,'username:'+username,'\n')
 
-
-    
-
-def create_account(access_token,password,domain,username):
-    try:
-            
-        headers = {
-            
-            # 'Content-Length': '134',
-            'Content-Type': 'application/json; charset=utf-8',
-            'Authorization': 'Bearer {0}'.format(access_token),
-        }
-
-        json_data = {
-            'email': username+temp_email_domain,
-            'username': username,
-            'password': password,
-            'reason': '',
-            'agreement': True,
-            'locale': 'en',
-        }
-
-        response = requests.post('https://'+domain+'/api/v1/accounts', headers=headers, json=json_data)
-        # print(response.json())
-        return response.json()
-    except Exception and JSONDecodeError as e:
-        print("JSONDecodeError")
-        # continue
-
+            print(response.json())
 
 create_accounts()
